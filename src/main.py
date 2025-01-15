@@ -1,13 +1,14 @@
 import cv2
 import numpy as np
+import os
 from ultralytics import YOLO
 from scipy.optimize import linear_sum_assignment
 from data.data import FILE_PATH
 from kalman_filter import KalmanFilter
+from helper import get_file_path_in_project
 
 
-# Tracking-Methode
-def ball_analyser(video_path):
+def ball_analyser(video_path: str):
     model = YOLO("yolov8n.pt", verbose=False)
     cap = cv2.VideoCapture(video_path)
 
@@ -16,7 +17,7 @@ def ball_analyser(video_path):
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    out = cv2.VideoWriter("output_video.mp4", fourcc, fps, (frame_width, frame_height))
+    out = cv2.VideoWriter(get_file_path_in_project("examples", "output.mp4"), fourcc, fps, (frame_width, frame_height))
 
     kf_objects = []
     ball_positions = {}
@@ -87,7 +88,7 @@ def ball_analyser(video_path):
 
         out.write(frame)  # Write the frame to the output video
         cv2.imshow("Tracking", frame)
-        if cv2.waitKey(30) & 0xFF == 27:
+        if cv2.waitKey(1) & 0xFF == 27:
             break
 
     cap.release()
@@ -96,5 +97,4 @@ def ball_analyser(video_path):
 
 
 # Video Pfad
-ball_analyser(FILE_PATH)
-
+ball_analyser(get_file_path_in_project("examples", "Example_Video.mp4"))

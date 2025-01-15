@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "BallAnalytics"
+version = "0.1.0"
+description = "A project for football analytics using machine learning algorithms."
+authors = ["Marc Zemelka <marc.zemelka@web.de>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+opencv-python = "^4.5.3"
+numpy = "^1.21.0"
+ultralytics = "^0.0.31"
+scipy = "^1.7.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
