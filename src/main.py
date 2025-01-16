@@ -14,7 +14,7 @@ from helper import (
 def ball_analyser(video_path: str) -> None:
     model = YOLO("yolov8n.pt", verbose=False)
     cap = cv2.VideoCapture(video_path)
-    out = initialize_video_writer(cap, output_path=get_file_path_in_project("examples", "output.mp4"))
+    out = initialize_video_writer(cap, output_path=get_file_path_in_project("examples", "result.mp4"))
 
     kf_objects = []
     ball_positions = {}
