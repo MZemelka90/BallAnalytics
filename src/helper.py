@@ -83,7 +83,7 @@ def initialize_video_writer(cap: cv2.VideoCapture, output_path: str) -> cv2.Vide
     return cv2.VideoWriter(output_path, fourcc, fps, (frame_width, frame_height))
 
 
-def extract_ball_positions_and_bounding_boxes(model: YOLO, frame: np.ndarray) -> tuple:
+def extract_ball_positions_and_bounding_boxes(model: YOLO, frame: np.ndarray, conf_threshold: float = 0.75) -> tuple:
     """
     Process a frame from a video and find all detected balls in the frame.
 
@@ -105,7 +105,7 @@ def extract_ball_positions_and_bounding_boxes(model: YOLO, frame: np.ndarray) ->
             cls = int(box.cls[0])
             cls_name = model.names[cls]
 
-            if cls_name != "sports ball" or box.conf[0] < 0.75:
+            if cls_name != "sports ball" or box.conf[0] < conf_threshold:
                 continue
 
             x1, y1, x2, y2 = map(int, box.xyxy[0])

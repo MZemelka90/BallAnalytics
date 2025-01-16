@@ -24,7 +24,7 @@ def ball_analyser(video_path: str) -> None:
         if not ret:
             break
 
-        measurements, bounding_boxes = extract_ball_positions_and_bounding_boxes(model, frame)
+        measurements, bounding_boxes = extract_ball_positions_and_bounding_boxes(model, frame, 0.75)
         cost_matrix = create_cost_matrix(kf_objects, measurements, bounding_boxes, frame)
         update_kalman_filters(kf_objects, measurements, bounding_boxes, frame, cost_matrix)
 
