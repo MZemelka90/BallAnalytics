@@ -31,11 +31,13 @@ def draw_trail(frame: np.ndarray, ball_positions: dict) -> None:
         ball_positions (dict): A dictionary of ball positions.
         The keys are ball IDs and the values are lists of positions.
     """
+    colors = [(0, 0, 255), (0, 255, 0), (255, 0, 0), (0, 255, 255), (255, 0, 255), (255, 255, 0)]
     for i, positions in ball_positions.items():
+        color = colors[i % len(colors)]
         for j in range(1, len(positions)):
             if positions[j - 1] == (0, 0) or positions[j] == (0, 0):
                 continue
-            cv2.circle(frame, positions[j], 2, (0, 0, 0), -1)
+            cv2.circle(frame, positions[j], 2, color, -1)
 
 
 def draw_predictions(frame: np.ndarray, kf_objects: list, ball_positions: dict) -> None:

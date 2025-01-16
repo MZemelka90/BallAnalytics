@@ -17,8 +17,8 @@ class KalmanFilter:
             [0, 1, 0, 0]
         ], np.float32)
 
-        self.kf.processNoiseCov = np.eye(4, dtype=np.float32) * 1e-2
-        self.kf.measurementNoiseCov = np.eye(2, dtype=np.float32) * 1e-1
+        self.kf.processNoiseCov = np.eye(4, dtype=np.float32) * 1e-1
+        self.kf.measurementNoiseCov = np.eye(2, dtype=np.float32) * 1
         self.kf.errorCovPost = np.eye(4, dtype=np.float32)
         self.kf.statePost = np.zeros(4, dtype=np.float32)
 
