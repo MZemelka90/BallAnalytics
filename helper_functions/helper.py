@@ -28,12 +28,12 @@ def draw_trail(frame: np.ndarray, ball_positions: dict) -> None:
         ball_positions (dict): A dictionary of ball positions.
         The keys are ball IDs and the values are lists of positions.
     """
-    colors = [(0, 0, 255), (0, 255, 0), (255, 0, 0), (0, 255, 255), (255, 0, 255), (255, 255, 0)]
+    colors = [(0, 255, 255), (255, 0, 255), (255, 255, 0), (0, 255, 0)]
     for i, positions in ball_positions.items():
-        color = colors[i % len(colors)]
         for j in range(1, len(positions)):
             if positions[j - 1] == (0, 0) or positions[j] == (0, 0):
                 continue
+            color = colors[i % len(colors)]
             cv2.line(frame, positions[j - 1], positions[j], color, 2)
 
 

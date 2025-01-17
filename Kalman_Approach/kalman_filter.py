@@ -23,13 +23,18 @@ class KalmanFilter:
         self.kf.errorCovPost = np.eye(4, dtype=np.float32)
         self.kf.statePost = np.zeros(4, dtype=np.float32)
 
-        self.color_histogram = None
+        self.prev_position = None
+        self.velocity = 0.0  # Initialisierung der Geschwindigkeit
 
     def predict(self):
         return self.kf.predict()
 
     def update(self, measurement):
-        return self.kf.correct(measurement)
+        corrected = self.kf.correct(measurement)
+        if self.prev_position is not None:
+            self.velocity = np.linalg.norm(corrected[:2] - self.prev_position)
+        self.prev_position = corrected[:2].copy()
+        return corrected
 
     def set_color_histogram(self, frame: np.ndarray, bounding_box: tuple) -> None:
         """Compute a color histogram for a given region of interest (bounding box)
@@ -131,24 +136,36 @@ def update_kalman_filters(kf_objects, measurements, bounding_boxes, frame, cost_
 
 def draw_predictions(frame: np.ndarray, kf_objects: list, ball_positions: dict) -> None:
     """
-    Draw predicted positions of balls on the given frame.
-
-    Args:
-        frame (np.ndarray): The frame to draw on.
-        kf_objects (list): A list of KalmanFilter objects used for prediction.
-        ball_positions (dict): A dictionary to store ball positions. The keys are ball IDs and
-        the values are lists of positions.
-
-    Returns:
-        None
+    Zeichnet vorhergesagte Positionen von Bällen auf dem Frame mit zusätzlichen visuellen Effekten.
     """
+    colors = [(0, 255, 255), (255, 0, 255), (255, 255, 0), (0, 255, 0)]
+
     for i, kf in enumerate(kf_objects):
         predicted = kf.predict()
+        px, py = int(predicted[0]), int(predicted[1])
 
+        # Ball-Kontur zeichnen
+        color = colors[i % len(colors)]
+        if px == 0 or py == 0:
+            continue
+        cv2.circle(frame, (px, py), 10, color, -1)
+        cv2.putText(frame, f"Ball {i + 1}", (px + 10, py + 20), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
+
+        # Geschwindigkeitsanzeige
+        speed_text = f"{kf.velocity:.2f} px/frame"
+        cv2.putText(frame, speed_text, (px + 10, py - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+        # Unsicherheitsbereich anzeigen
+        uncertainty = int(np.linalg.norm(kf.kf.errorCovPost[:2, :2]))
+        cv2.circle(frame, (px, py), uncertainty, color, 1, cv2.LINE_AA)
+
+        # Ballpfad speichern und zeichnen
         if i not in ball_positions:
             ball_positions[i] = []
-        ball_positions[i].append((int(predicted[0]), int(predicted[1])))
+        ball_positions[i].append((px, py))
 
-        px, py = int(predicted[0]), int(predicted[1])
-        cv2.circle(frame, (px, py), 10, (0, 0, 0), 2)
-        cv2.putText(frame, f"Ball {i + 1}", (px + 10, py + 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+        # Transparente Spur zeichnen
+        overlay = frame.copy()
+        for j in range(1, len(ball_positions[i])):
+            cv2.line(overlay, ball_positions[i][j - 1], ball_positions[i][j], color, 2)
+        cv2.addWeighted(overlay, 0.5, frame, 0.5, 0, frame)
