@@ -18,8 +18,8 @@ class KalmanFilter:
             [0, 1, 0, 0]
         ], np.float32)
 
-        self.kf.processNoiseCov = np.eye(4, dtype=np.float32) * 1e-1
-        self.kf.measurementNoiseCov = np.eye(2, dtype=np.float32) * 1
+        self.kf.processNoiseCov = np.eye(4, dtype=np.float32) * 1e-4
+        self.kf.measurementNoiseCov = np.eye(2, dtype=np.float32) * 1e-2
         self.kf.errorCovPost = np.eye(4, dtype=np.float32)
         self.kf.statePost = np.zeros(4, dtype=np.float32)
 
@@ -92,6 +92,7 @@ def create_cost_matrix(kf_objects, measurements, bounding_boxes, frame):
             position_cost = np.linalg.norm(predicted[:2] - position)
             color_cost = kf.compare_color_histogram(frame, bbox) if kf.color_histogram is not None else 0
             total_cost = position_cost + color_cost
+
             costs.append(total_cost)
         cost_matrix.append(costs)
     return np.array(cost_matrix) if cost_matrix else None
@@ -127,6 +128,7 @@ def update_kalman_filters(kf_objects, measurements, bounding_boxes, frame, cost_
         kf.set_color_histogram(frame, bounding_boxes[len(kf_objects)])
         kf_objects.append(kf)
 
+
 def draw_predictions(frame: np.ndarray, kf_objects: list, ball_positions: dict) -> None:
     """
     Draw predicted positions of balls on the given frame.
@@ -148,5 +150,5 @@ def draw_predictions(frame: np.ndarray, kf_objects: list, ball_positions: dict) 
         ball_positions[i].append((int(predicted[0]), int(predicted[1])))
 
         px, py = int(predicted[0]), int(predicted[1])
-        cv2.circle(frame, (px, py), 10, (0, 255, 0), -1)
-        cv2.putText(frame, f"Ball {i + 1}", (px, py), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.circle(frame, (px, py), 10, (0, 0, 0), 2)
+        cv2.putText(frame, f"Ball {i + 1}", (px + 10, py + 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)

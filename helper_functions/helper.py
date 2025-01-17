@@ -34,7 +34,7 @@ def draw_trail(frame: np.ndarray, ball_positions: dict) -> None:
         for j in range(1, len(positions)):
             if positions[j - 1] == (0, 0) or positions[j] == (0, 0):
                 continue
-            cv2.circle(frame, positions[j], 2, color, -1)
+            cv2.line(frame, positions[j - 1], positions[j], color, 2)
 
 
 def initialize_video_writer(cap: cv2.VideoCapture, output_path: str) -> cv2.VideoWriter:
@@ -65,9 +65,10 @@ def extract_ball_positions_and_bounding_boxes(model: YOLO, frame: np.ndarray, co
         conf_threshold: The confidence threshold for the object detection.
 
     Returns:
-        A tuple of two lists. The first list contains the center positions of the
+        A tuple of three lists. The first list contains the center positions of the
         detected balls as numpy arrays. The second list contains the bounding boxes
-        of the detected balls as tuples of four integers (x1, y1, x2, y2).
+        of the detected balls as tuples of four integers (x1, y1, x2, y2). The third
+        list contains the radii of the detected balls as floats.
     """
     results = model(frame, verbose=False)
     measurements = []
