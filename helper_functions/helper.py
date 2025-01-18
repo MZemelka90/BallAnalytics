@@ -37,6 +37,28 @@ def draw_trail(frame: np.ndarray, ball_positions: dict) -> None:
             cv2.line(frame, positions[j - 1], positions[j], color, 2)
 
 
+def draw_ball_statistics(frame: np.ndarray, ball_detections: dict, frame_count: int) -> None:
+    """
+    Print the statistics of the ball positions.
+
+    Args:
+        ball_detections (dict): A dictionary of ball positions.
+        The keys are ball IDs and the values are lists of positions.
+        frame (ndarray): The frame to draw on.
+        frame_count (int): The total number of frames in the video.
+    """
+
+    detected_percentage = ball_detections['balls'] / (3 * frame_count) * 100
+    cv2.putText(frame,
+                f"Ball detection percentage: {detected_percentage:.2f}%",
+                (20, 100),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1.2,
+                (0, 0, 0),
+                3
+                )
+
+
 def initialize_video_writer(cap: cv2.VideoCapture, output_path: str) -> cv2.VideoWriter:
     """
     Initializes a VideoWriter from a given VideoCapture object and an output path.
@@ -55,7 +77,10 @@ def initialize_video_writer(cap: cv2.VideoCapture, output_path: str) -> cv2.Vide
     return cv2.VideoWriter(output_path, fourcc, fps, (frame_width, frame_height))
 
 
-def extract_ball_positions_and_bounding_boxes(model: YOLO, frame: np.ndarray, conf_threshold: float = 0.75) -> tuple:
+def extract_ball_positions_and_bounding_boxes(model: YOLO,
+                                              frame: np.ndarray,
+                                              ball_detections: dict,
+                                              conf_threshold: float = 0.75) -> tuple:
     """
     Process a frame from a video and find all detected balls in the frame.
 
@@ -75,7 +100,7 @@ def extract_ball_positions_and_bounding_boxes(model: YOLO, frame: np.ndarray, co
     bounding_boxes = []
 
     if results is not None and len(results) > 0:
-        for box in results[0].boxes.cpu().numpy():
+        for i, box in enumerate(results[0].boxes.cpu().numpy()):
             cls = int(box.cls[0])
             cls_name = model.names[cls]
 
@@ -86,5 +111,6 @@ def extract_ball_positions_and_bounding_boxes(model: YOLO, frame: np.ndarray, co
             cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
             measurements.append(np.array([[np.float32(cx)], [np.float32(cy)]]))
             bounding_boxes.append((x1, y1, x2, y2))
+            ball_detections['balls'] = 1 + ball_detections.get('balls', 0)
 
     return measurements, bounding_boxes

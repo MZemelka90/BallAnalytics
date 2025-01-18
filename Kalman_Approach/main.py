@@ -6,6 +6,7 @@ from helper_functions.helper import (
     draw_trail,
     initialize_video_writer,
     extract_ball_positions_and_bounding_boxes,
+    draw_ball_statistics
 )
 
 
@@ -16,17 +17,21 @@ def ball_analyser(video_path: str) -> None:
 
     kf_objects = []
     ball_positions = {}
+    frame_counter = 0
+    ball_detections = {}
 
     while cap.isOpened():
+        frame_counter += 1
         ret, frame = cap.read()
         if not ret:
             break
 
-        measurements, bounding_boxes = extract_ball_positions_and_bounding_boxes(model, frame, 0.7)
+        measurements, bounding_boxes = extract_ball_positions_and_bounding_boxes(model, frame, ball_detections, 0.7)
         cost_matrix = create_cost_matrix(kf_objects, measurements, bounding_boxes, frame)
         update_kalman_filters(kf_objects, measurements, bounding_boxes, frame, cost_matrix)
 
         draw_predictions(frame, kf_objects, ball_positions)
+        draw_ball_statistics(frame, ball_detections, frame_counter)
         draw_trail(frame, ball_positions)
 
         out.write(frame)

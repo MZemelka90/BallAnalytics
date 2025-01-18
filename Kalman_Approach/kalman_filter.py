@@ -24,7 +24,7 @@ class KalmanFilter:
         self.kf.statePost = np.zeros(4, dtype=np.float32)
 
         self.prev_position = None
-        self.velocity = 0.0  # Initialisierung der Geschwindigkeit
+        self.velocity = 0.0
 
     def predict(self):
         return self.kf.predict()
@@ -144,27 +144,20 @@ def draw_predictions(frame: np.ndarray, kf_objects: list, ball_positions: dict) 
         predicted = kf.predict()
         px, py = int(predicted[0]), int(predicted[1])
 
-        # Ball-Kontur zeichnen
         color = colors[i % len(colors)]
         if px == 0 or py == 0:
             continue
         cv2.circle(frame, (px, py), 10, color, -1)
         cv2.putText(frame, f"Ball {i + 1}", (px + 10, py + 20), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
 
-        # Geschwindigkeitsanzeige
+        # show speed of the ball
         speed_text = f"{kf.velocity:.2f} px/frame"
         cv2.putText(frame, speed_text, (px + 10, py - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
-        # Unsicherheitsbereich anzeigen
-        uncertainty = int(np.linalg.norm(kf.kf.errorCovPost[:2, :2]))
-        cv2.circle(frame, (px, py), uncertainty, color, 1, cv2.LINE_AA)
-
-        # Ballpfad speichern und zeichnen
         if i not in ball_positions:
             ball_positions[i] = []
         ball_positions[i].append((px, py))
 
-        # Transparente Spur zeichnen
         overlay = frame.copy()
         for j in range(1, len(ball_positions[i])):
             cv2.line(overlay, ball_positions[i][j - 1], ball_positions[i][j], color, 2)
