@@ -136,6 +136,4 @@ def draw_predictions(frame: np.ndarray, kf_objects: list, ball_positions: dict) 
         ball_positions[i].append((px, py))
 
         overlay = frame.copy()
-        for j in range(1, len(ball_positions[i])):
-            cv2.line(overlay, ball_positions[i][j - 1], ball_positions[i][j], color, 2)
         cv2.addWeighted(overlay, 0.5, frame, 0.5, 0, frame)

@@ -19,7 +19,7 @@ def get_file_path_in_project(dir_name: str, file_name: str) -> str:
     return os.path.join(project_dir, dir_name, file_name)
 
 
-def draw_trail(frame: np.ndarray, ball_positions: dict) -> None:
+def draw_trail(frame: np.ndarray, ball_positions: dict, max_trail_length: int = 30) -> None:
     """
     Draw trails of balls based on previous positions.
 
@@ -27,14 +27,18 @@ def draw_trail(frame: np.ndarray, ball_positions: dict) -> None:
         frame (ndarray): The frame to draw on.
         ball_positions (dict): A dictionary of ball positions.
         The keys are ball IDs and the values are lists of positions.
+        max_trail_length (int): The maximum number of previous positions to draw.
     """
     colors = [(0, 255, 255), (255, 0, 255), (255, 255, 0), (0, 255, 0)]
     for i, positions in ball_positions.items():
-        for j in range(1, len(positions)):
-            if positions[j - 1] == (0, 0) or positions[j] == (0, 0):
+        if len(positions) < max_trail_length:
+            continue
+        updated_positions = positions[-max_trail_length:]
+        for j in range(1, len(updated_positions)):
+            if updated_positions[j - 1] == (0, 0) or updated_positions[j] == (0, 0):
                 continue
             color = colors[i % len(colors)]
-            cv2.line(frame, positions[j - 1], positions[j], color, 2)
+            cv2.line(frame, updated_positions[j - 1], updated_positions[j], color, 2)
 
 
 def draw_ball_statistics(frame: np.ndarray, ball_detections: dict, frame_count: int) -> None:
