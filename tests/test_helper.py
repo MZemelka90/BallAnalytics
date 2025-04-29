@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch, call
 import numpy as np
 import os
 import cv2
-from helper import get_file_path_in_project, draw_trail, draw_ball_statistics, initialize_video_writer, \
+from helper_functions.helper import get_file_path_in_project, draw_trail, draw_ball_statistics, initialize_video_writer, \
     extract_ball_positions_and_bounding_boxes
 
 
